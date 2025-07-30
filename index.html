@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Bookshelf</title>
+  <style>
+    /* خلفية الصفحة */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+    /* تصميم النموذج */
+    form {
+      max-width: 400px;
+      margin: 0 auto 30px auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      color: #34495e;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    input[type="text"]:focus {
+      border-color: #2980b9;
+      outline: none;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background-color: #2980b9;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #1c5980;
+    }
+    /* رف الكتب */
+    .bookshelf {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    /* بطاقة الكتاب */
+    .book {
+      background-color: white;
+      width: 140px;
+      border-radius: 10px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #2c3e50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+    .book:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    .book img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      background-color: #ddd;
+    }
+    .book-title {
+      font-weight: 700;
+      margin-bottom: 5px;
+      height: 40px;
+      overflow: hidden;
+    }
+    .book-author {
+      font-style: italic;
+      color: #7f8c8d;
+      height: 30px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+<h1>📚 My Bookshelf</h1>
+
+<form id="bookForm">
+  <label for="title">📖 Book Title:</label>
+  <input type="text" id="title" name="title" placeholder="Enter book title" required />
+
+  <label for="author">✍️ Author:</label>
+  <input type="text" id="author" name="author" placeholder="Enter author name" required />
+
+  <label for="image">🖼️ Cover Image (URL):</label>
+  <input type="text" id="image" name="image" placeholder="Optional image URL" />
+
+  <button type="submit">➕ Add to Shelf</button>
+</form>
+
+<div class="bookshelf" id="bookshelf"></div>
+
+<script>
+  const form = document.getElementById("bookForm");
+  const shelf = document.getElementById("bookshelf");
+
+  // تحميل الكتب من localStorage أو إنشاء مصفوفة جديدة
+  let books = JSON.parse(localStorage.getItem("bookshelf")) || [];
+
+  // دالة عرض الكتب على الصفحة
+  function renderBooks() {
+    shelf.innerHTML = "";
+    if (books.length === 0) {
+      shelf.innerHTML = "<p style='text-align:center; color:#888;'>Your bookshelf is empty. Add some books!</p>";
+      return;
+    }
+    books.forEach(book => {
+      const bookDiv = document.createElement("div");
+      bookDiv.className = "book";
+      bookDiv.innerHTML = `
+        <img src="${book.image ? book.image : 'https://via.placeholder.com/140x180?text=No+Cover'}" alt="Book Cover" />
+        <div class="book-title" title="${book.title}">${book.title}</div>
+        <div class="book-author" title="${book.author}">${book.author}</div>
+      `;
+      shelf.appendChild(bookDiv);
+    });
+  }
+
+  // عند إرسال النموذج
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const title = form.title.value.trim();
+    const author = form.author.value.trim();
+    const image = form.image.value.trim();
+
+    if (!title || !author) {
+      alert("Please enter both the book title and author.");
+      return;
+    }
+
+    books.push({ title, author, image });
+    localStorage.setItem("bookshelf", JSON.stringify(books));
+    renderBooks();
+    form.reset();
+  });
+
+  // عرض الكتب عند تحميل الصفحة
+  renderBooks();
+</script>
+
+</body>
+</html>
