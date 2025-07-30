@@ -1,0 +1,576 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  MessageCircle, 
+  Phone, 
+  Users, 
+  Settings, 
+  User, 
+  Plus, 
+  Search, 
+  Menu,
+  Send,
+  Mic,
+  Image,
+  Paperclip,
+  MoreVertical,
+  ArrowLeft,
+  Crown,
+  Shield,
+  Eye,
+  Download,
+  Forward,
+  Edit3,
+  Trash2,
+  Pin,
+  Bell,
+  Moon,
+  Sun,
+  Globe,
+  Lock,
+  UserCheck,
+  UserX,
+  LogOut
+} from 'lucide-react';
+
+const ChatApp = () => {
+  const [currentView, setCurrentView] = useState('chats');
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [newMessage, setNewMessage] = useState('');
+  const [showProfile, setShowProfile] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Mock data
+  const [currentUser] = useState({
+    id: '#00001',
+    username: 'john_doe',
+    displayName: 'John Doe',
+    email: 'john@example.com',
+    bio: 'Privacy enthusiast and tech lover',
+    profilePicture: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop'
+  });
+
+  const [chats, setChats] = useState([
+    {
+      id: 1,
+      name: 'Sarah Wilson',
+      username: 'sarah_w',
+      userId: '#00002',
+      lastMessage: 'Thanks for the help!',
+      timestamp: '2:30 PM',
+      unread: 0,
+      isGroup: false,
+      profilePicture: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop'
+    },
+    {
+      id: 2,
+      name: 'Tech Enthusiasts',
+      lastMessage: 'Mike: Check out this new framework',
+      timestamp: '1:15 PM',
+      unread: 3,
+      isGroup: true,
+      members: 15,
+      role: 'admin',
+      profilePicture: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=150&h=150&fit=crop'
+    },
+    {
+      id: 3,
+      name: 'Alex Chen',
+      username: 'alex_c',
+      userId: '#00003',
+      lastMessage: 'Voice call - 5:23',
+      timestamp: '11:45 AM',
+      unread: 0,
+      isGroup: false,
+      profilePicture: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop'
+    }
+  ]);
+
+  const [messages, setMessages] = useState({
+    1: [
+      {
+        id: 1,
+        sender: 'Sarah Wilson',
+        content: 'Hey! How are you doing?',
+        timestamp: '2:25 PM',
+        isMe: false
+      },
+      {
+        id: 2,
+        sender: 'You',
+        content: 'I\'m doing great! Just working on a new project.',
+        timestamp: '2:27 PM',
+        isMe: true
+      },
+      {
+        id: 3,
+        sender: 'Sarah Wilson',
+        content: 'Thanks for the help!',
+        timestamp: '2:30 PM',
+        isMe: false
+      }
+    ]
+  });
+
+  const theme = isDarkMode ? 'dark' : 'light';
+
+  const sendMessage = () => {
+    if (!newMessage.trim() || !selectedChat) return;
+    
+    const message = {
+      id: Date.now(),
+      sender: 'You',
+      content: newMessage,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isMe: true
+    };
+
+    setMessages(prev => ({
+      ...prev,
+      [selectedChat.id]: [...(prev[selectedChat.id] || []), message]
+    }));
+
+    setChats(prev => prev.map(chat => 
+      chat.id === selectedChat.id 
+        ? { ...chat, lastMessage: newMessage, timestamp: message.timestamp }
+        : chat
+    ));
+
+    setNewMessage('');
+  };
+
+  const ProfileView = () => (
+    <div className={`fixed inset-0 z-50 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+      <div className={`flex items-center p-4 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-blue-600'}`}>
+        <button onClick={() => setShowProfile(false)} className={`mr-4 ${isDarkMode ? 'text-white' : 'text-white'}`}>
+          <ArrowLeft size={24} />
+        </button>
+        <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-white'}`}>Profile</h2>
+      </div>
+      
+      <div className="p-6">
+        <div className="flex flex-col items-center mb-6">
+          <img 
+            src={currentUser.profilePicture} 
+            alt="Profile" 
+            className="w-24 h-24 rounded-full mb-4 object-cover"
+          />
+          <button className={`px-4 py-2 rounded-lg ${isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-600 text-white'} hover:opacity-90`}>
+            Change Photo
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Display Name
+            </label>
+            <p className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{currentUser.displayName}</p>
+          </div>
+
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Username
+            </label>
+            <p className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>@{currentUser.username}</p>
+          </div>
+
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              User ID
+            </label>
+            <p className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{currentUser.id}</p>
+          </div>
+
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Email
+            </label>
+            <p className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{currentUser.email}</p>
+          </div>
+
+          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+            <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Bio
+            </label>
+            <p className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{currentUser.bio}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const SettingsView = () => {
+    const [settingsTab, setSettingsTab] = useState('account');
+
+    const SettingsTab = ({ id, label, icon: Icon, active, onClick }) => (
+      <button
+        onClick={() => onClick(id)}
+        className={`flex items-center w-full p-3 rounded-lg transition-colors ${
+          active 
+            ? (isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-600 text-white')
+            : (isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100')
+        }`}
+      >
+        <Icon size={20} className="mr-3" />
+        {label}
+      </button>
+    );
+
+    return (
+      <div className={`fixed inset-0 z-50 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+        <div className={`flex items-center p-4 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-blue-600'}`}>
+          <button onClick={() => setShowSettings(false)} className={`mr-4 ${isDarkMode ? 'text-white' : 'text-white'}`}>
+            <ArrowLeft size={24} />
+          </button>
+          <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-white'}`}>Settings</h2>
+        </div>
+        
+        <div className="flex h-full">
+          <div className={`w-64 p-4 border-r ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'}`}>
+            <div className="space-y-2">
+              <SettingsTab id="account" label="Account" icon={User} active={settingsTab === 'account'} onClick={setSettingsTab} />
+              <SettingsTab id="privacy" label="Privacy" icon={Lock} active={settingsTab === 'privacy'} onClick={setSettingsTab} />
+              <SettingsTab id="notifications" label="Notifications" icon={Bell} active={settingsTab === 'notifications'} onClick={setSettingsTab} />
+              <SettingsTab id="appearance" label="Appearance" icon={isDarkMode ? Sun : Moon} active={settingsTab === 'appearance'} onClick={setSettingsTab} />
+              <SettingsTab id="sessions" label="Sessions" icon={LogOut} active={settingsTab === 'sessions'} onClick={setSettingsTab} />
+            </div>
+          </div>
+
+          <div className="flex-1 p-6">
+            {settingsTab === 'account' && (
+              <div className="space-y-4">
+                <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Account Settings</h3>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                  <button className={`text-blue-600 hover:text-blue-700 mb-2 block`}>Change Display Name</button>
+                  <button className={`text-blue-600 hover:text-blue-700 mb-2 block`}>Change Email</button>
+                  <button className={`text-blue-600 hover:text-blue-700 mb-2 block`}>Change Password</button>
+                  <button className={`text-red-600 hover:text-red-700 block`}>Delete Account</button>
+                </div>
+              </div>
+            )}
+
+            {settingsTab === 'privacy' && (
+              <div className="space-y-4">
+                <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Privacy Settings</h3>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                  <div className="space-y-3">
+                    <div>
+                      <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Who can search for me
+                      </label>
+                      <select className={`w-full p-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                        <option>Everyone</option>
+                        <option>Friends only</option>
+                        <option>Nobody</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Who can send requests
+                      </label>
+                      <select className={`w-full p-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                        <option>Everyone</option>
+                        <option>Friends of friends</option>
+                        <option>Nobody</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Who can add me to groups
+                      </label>
+                      <select className={`w-full p-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                        <option>Everyone</option>
+                        <option>Friends only</option>
+                        <option>Nobody</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {settingsTab === 'appearance' && (
+              <div className="space-y-4">
+                <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Appearance & Language</h3>
+                <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className={`${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Dark Mode</span>
+                      <button
+                        onClick={() => setIsDarkMode(!isDarkMode)}
+                        className={`w-12 h-6 rounded-full transition-colors ${
+                          isDarkMode ? 'bg-blue-600' : 'bg-gray-300'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 bg-white rounded-full transition-transform ${
+                          isDarkMode ? 'translate-x-6' : 'translate-x-1'
+                        }`} />
+                      </button>
+                    </div>
+                    <div>
+                      <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Language
+                      </label>
+                      <select className={`w-full p-2 rounded border ${isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                        <option>English</option>
+                        <option>العربية</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ChatView = () => (
+    <div className="flex flex-col h-full">
+      <div className={`flex items-center p-4 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+        <button onClick={() => setSelectedChat(null)} className={`mr-3 ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
+          <ArrowLeft size={24} />
+        </button>
+        <img 
+          src={selectedChat.profilePicture} 
+          alt={selectedChat.name} 
+          className="w-10 h-10 rounded-full mr-3 object-cover"
+        />
+        <div className="flex-1">
+          <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            {selectedChat.name}
+            {selectedChat.isGroup && selectedChat.role === 'owner' && <Crown size={16} className="inline ml-1 text-yellow-500" />}
+            {selectedChat.isGroup && selectedChat.role === 'admin' && <Shield size={16} className="inline ml-1 text-blue-500" />}
+          </h3>
+          {selectedChat.isGroup && (
+            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              {selectedChat.members} members
+            </p>
+          )}
+        </div>
+        <button className={`p-2 ${isDarkMode ? 'text-white hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} rounded-full`}>
+          <Phone size={20} />
+        </button>
+        <button className={`p-2 ml-2 ${isDarkMode ? 'text-white hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'} rounded-full`}>
+          <MoreVertical size={20} />
+        </button>
+      </div>
+
+      <div className={`flex-1 overflow-y-auto p-4 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        {(messages[selectedChat.id] || []).map((message) => (
+          <div key={message.id} className={`mb-4 flex ${message.isMe ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+              message.isMe 
+                ? 'bg-blue-600 text-white' 
+                : (isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900')
+            }`}>
+              {!message.isMe && selectedChat.isGroup && (
+                <p className="text-xs font-semibold mb-1 text-blue-400">{message.sender}</p>
+              )}
+              <p>{message.content}</p>
+              <p className={`text-xs mt-1 ${
+                message.isMe ? 'text-blue-100' : (isDarkMode ? 'text-gray-400' : 'text-gray-500')
+              }`}>
+                {message.timestamp}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className={`p-4 border-t ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+        <div className="flex items-center space-x-2">
+          <button className={`p-2 ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}>
+            <Paperclip size={20} />
+          </button>
+          <button className={`p-2 ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}>
+            <Image size={20} />
+          </button>
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            placeholder="Type a message..."
+            className={`flex-1 p-3 rounded-full border ${
+              isDarkMode 
+                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                : 'bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-500'
+            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          />
+          <button className={`p-2 ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}>
+            <Mic size={20} />
+          </button>
+          <button 
+            onClick={sendMessage}
+            className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+          >
+            <Send size={20} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const MainView = () => (
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border-r ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+          <div className="flex items-center">
+            <img 
+              src={currentUser.profilePicture} 
+              alt="Profile" 
+              className="w-10 h-10 rounded-full mr-3 object-cover"
+            />
+            <div className="flex-1">
+              <h2 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {currentUser.displayName}
+              </h2>
+              <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                {currentUser.id}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="p-4">
+          <div className="space-y-2">
+            <button 
+              onClick={() => setShowProfile(true)}
+              className={`flex items-center w-full p-3 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
+            >
+              <User size={20} className="mr-3" />
+              Profile
+            </button>
+            <button className={`flex items-center w-full p-3 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}>
+              <Users size={20} className="mr-3" />
+              New Group
+            </button>
+            <button className={`flex items-center w-full p-3 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}>
+              <MessageCircle size={20} className="mr-3" />
+              New Chat
+            </button>
+            <button className={`flex items-center w-full p-3 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}>
+              <Phone size={20} className="mr-3" />
+              Call History
+            </button>
+            <button 
+              onClick={() => setShowSettings(true)}
+              className={`flex items-center w-full p-3 rounded-lg transition-colors ${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`}
+            >
+              <Settings size={20} className="mr-3" />
+              Settings
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'} lg:hidden`}>
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className={`${isDarkMode ? 'text-white' : 'text-gray-700'}`}
+            >
+              <Menu size={24} />
+            </button>
+            <h1 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              ChatApp
+            </h1>
+            <div className="w-6" />
+          </div>
+        </div>
+
+        {selectedChat ? (
+          <ChatView />
+        ) : (
+          <div className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+            {/* Search Bar */}
+            <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+              <div className="relative">
+                <Search size={20} className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                <input
+                  type="text"
+                  placeholder="Search chats..."
+                  className={`w-full pl-10 pr-4 py-3 rounded-full border ${
+                    isDarkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-500'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+              </div>
+            </div>
+
+            {/* Chat List */}
+            <div className="flex-1 overflow-y-auto">
+              {chats.map((chat) => (
+                <div
+                  key={chat.id}
+                  onClick={() => setSelectedChat(chat)}
+                  className={`flex items-center p-4 border-b cursor-pointer transition-colors ${
+                    isDarkMode 
+                      ? 'border-gray-700 hover:bg-gray-800' 
+                      : 'border-gray-100 hover:bg-gray-50'
+                  }`}
+                >
+                  <img 
+                    src={chat.profilePicture} 
+                    alt={chat.name} 
+                    className="w-12 h-12 rounded-full mr-4 object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className={`font-semibold truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {chat.name}
+                        {chat.isGroup && chat.role === 'owner' && <Crown size={16} className="inline ml-1 text-yellow-500" />}
+                        {chat.isGroup && chat.role === 'admin' && <Shield size={16} className="inline ml-1 text-blue-500" />}
+                      </h3>
+                      <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {chat.timestamp}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className={`text-sm truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {chat.lastMessage}
+                      </p>
+                      {chat.unread > 0 && (
+                        <span className="ml-2 bg-blue-600 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                          {chat.unread}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Floating Action Button */}
+            <button className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+              <Plus size={24} />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+      {showProfile ? (
+        <ProfileView />
+      ) : showSettings ? (
+        <SettingsView />
+      ) : (
+        <MainView />
+      )}
+    </div>
+  );
+};
+
+export default ChatApp;
